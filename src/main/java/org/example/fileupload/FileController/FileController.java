@@ -1,9 +1,7 @@
 package org.example.fileupload.FileController;
 
-import ch.qos.logback.classic.log4j.XMLLayout;
-import io.swagger.v3.oas.models.responses.ApiResponse;
-import lombok.AllArgsConstructor;
 
+import lombok.AllArgsConstructor;
 import org.example.fileupload.FileModel.APIResponse;
 import org.example.fileupload.FileModel.FileResponse;
 import org.example.fileupload.FileService.FileService;
@@ -25,7 +23,7 @@ import java.util.List;
 
 public class FileController {
     private final FileService fileService;
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/uploadMany",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadFile(@RequestParam List<MultipartFile> files) throws IOException {
         String fileName = null;
         List<FileResponse> fileResponses = new ArrayList<>();
@@ -43,7 +41,23 @@ public class FileController {
                 .payload( fileResponses).build();
         return ResponseEntity.ok(response);
     }
+    @PostMapping(value = "/uploadOne",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+//    @PostMapping("/uploadOne")
+    public ResponseEntity<?> uploadOneFile(@RequestParam MultipartFile file) throws IOException {
+        String fileName = null;
+        fileName = fileService.saveFile(file);
+        String fileUrl = "http://localhost:8080/" + fileName;
+        FileResponse fileResponse = new FileResponse(fileName, fileUrl, file.getContentType(), file.getSize());
 
+
+
+
+        APIResponse<FileResponse> response = APIResponse.<FileResponse>builder()
+                .message("successfully uploaded file")
+                .status(HttpStatus.OK).code(200)
+                .payload( fileResponse).build();
+        return ResponseEntity.ok(response);
+    }
     @GetMapping
     public ResponseEntity<?> getFile(@RequestParam String fileName) throws IOException {
         Resource resource = fileService.getFileByFileName(fileName);

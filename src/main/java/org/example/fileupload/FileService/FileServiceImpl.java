@@ -34,6 +34,25 @@ public class FileServiceImpl implements FileService {
             return fileName;
         }else {return "Upload Failed";}
     }
+
+    @Override
+    public String postOne(MultipartFile file) throws IOException {
+        // get filename with extension (cute-cat.png)
+        String fileName = file.getOriginalFilename();
+        // cute-cat.png => [cute-cat, png]
+        assert fileName != null;
+        if (file.getOriginalFilename().contains(".png") || file.getOriginalFilename().contains(".jpg")
+                || file.getOriginalFilename().contains(".pdf")){
+            // convert file name to uuid format form
+            fileName = UUID.randomUUID()+ "." + StringUtils.getFilenameExtension(fileName);
+            // if the folder not exist create one
+            if (!Files.exists(path)){Files.createDirectories(path);}
+            // copy byte that from input stream to file
+            Files.copy(file.getInputStream(), path.resolve(fileName));
+            return fileName;
+        }else {return "Upload Failed";}
+    }
+
     @Override
     public Resource getFileByFileName(String fileName) throws IOException {
         //get file path
